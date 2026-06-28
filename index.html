@@ -207,11 +207,11 @@ const allTx = [
   { date:'06/21', time:'20:16', type:'payment', merchant:'SEICOMART',                       desc:'세이코마트. 홋카이도 토착 편의점 체인. 음식·음료.',                                                            jpy:751,   krw:7136,   excluded:false },
   { date:'06/21', time:'20:22', type:'payment', merchant:'SEVEN-ELEVEN',                    desc:'편의점. 음식·음료.',                                                                                            jpy:331,   krw:3145,   excluded:false },
   { date:'06/21', time:'20:25', type:'payment', merchant:'SEICOMART',                       desc:'세이코마트. 홋카이도 토착 편의점 체인. 음식·음료.',                                                            jpy:1608,  krw:15279,  excluded:false },
-  { date:'06/22', time:'10:21', type:'payment', merchant:'OYADOKIYOMIZUYA',                 desc:'오야도 기요미즈야. 신치토세공항 내 식당·기념품점 추정.',                                                       jpy:3150,  krw:29921,  excluded:false },
+  { date:'06/22', time:'10:21', type:'payment', merchant:'OYADOKIYOMIZUYA',                 desc:'오야도 기요미즈야. 노보리베츠 숙박비 결제.',                                                                   jpy:3150,  krw:29921,  excluded:false },
   { date:'06/22', time:'11:21', type:'payment', merchant:'COCA-COLA VENDING',               desc:'코카콜라 자판기. 음료.',                                                                                        jpy:110,   krw:1046,   excluded:false },
-  { date:'06/22', time:'13:06', type:'payment', merchant:'SHINCHITOSEKUUKOUTA-MINAR',       desc:'오빠 개인 사용 — 개별 지불. (신치토세공항 터미널 내 매장)',                                                    jpy:3940,  krw:37522,  excluded:true  },
+  { date:'06/22', time:'13:06', type:'payment', merchant:'SHINCHITOSEKUUKOUTA-MINAR',       desc:'신치토세공항 터미널 내 매장. 귀국 전 카드 결제.',                                                             jpy:3940,  krw:37522,  excluded:false },
   { date:'06/22', time:'13:46', type:'payment', merchant:'AINZ&TULPE',                      desc:'정이 개인 사용 — 개별 지불. (드럭스토어 화장품·잡화)',                                                        jpy:1170,  krw:11133,  excluded:true  },
-  { date:'06/22', time:'14:17', type:'payment', merchant:'SHINCHITOSEKUUKOUTA-MINAR',       desc:'신치토세공항 터미널 내 매장. 귀국 전 추가 구매.',                                                             jpy:1250,  krw:11884,  excluded:false },
+  { date:'06/22', time:'14:17', type:'payment', merchant:'SHINCHITOSEKUUKOUTA-MINAR',       desc:'오빠 개인 사용 — 개별 지불. (신치토세공항 터미널 내 매장)',                                                   jpy:1250,  krw:11884,  excluded:true  },
 ];
 
 function fmt(n){ return Number(n).toLocaleString('ko-KR'); }
@@ -352,10 +352,10 @@ dates.forEach(d=>{
 });
 
 const cats=[
-  {name:'🍜 식비·음료',     keys:['KAITENZUSHI TORITON KITAH','DAIICHI KAISENMARU','OYADOKIYOMIZUYA','NAMARAMUJINNGISUKAN ARATA','SEVEN-ELEVEN','SEICOMART','COCA-COLA VENDING','VENDING MACHINE','인천공항 점심','인천공항 간식','CARD PAYMENT'], excl:false},
+  {name:'🍜 식비·음료',     keys:['KAITENZUSHI TORITON KITAH','DAIICHI KAISENMARU','NAMARAMUJINNGISUKAN ARATA','SEVEN-ELEVEN','SEICOMART','COCA-COLA VENDING','VENDING MACHINE','인천공항 점심','인천공항 간식','CARD PAYMENT'], excl:false},
   {name:'🎡 관광·체험',     keys:['NOBORIBETSU BEAR PAR','HOKKAIDOBALLPARK FVILLAGE'], excl:false},
-  {name:'🚄 교통·숙박·패스', keys:['JR패스 (와그 구매)','SHINCHITOSEKUUKOUTA-MINAR','HOTEL EMION SAPPORO','KITA-KU SAPPORO-SHI (ATM 출금)'], excl:false},
-  {name:'👤 개인 사용 (제외)',keys:['DAISO','AINZ&TULPE','SHINCHITOSEKUUKOUTA-MINAR'], excl:true},
+  {name:'🚄 교통·숙박·패스', keys:['JR패스 (와그 구매)','SHINCHITOSEKUUKOUTA-MINAR','HOTEL EMION SAPPORO','KITA-KU SAPPORO-SHI (ATM 출금)','OYADOKIYOMIZUYA'], excl:false},
+  {name:'👤 개인 사용 (제외)',keys:['DAISO','AINZ&TULPE'], excl:true},
 ];
 const catGrid = document.getElementById('cat-grid');
 cats.forEach(cat=>{
