@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🇯🇵 홋카이도 여행 지출 내역 2026.06</title>
+<style>
+  :root {
+    --bg: #f5f4f0;
+    --surface: #ffffff;
+    --surface2: #f9f8f5;
+    --border: rgba(0,0,0,0.09);
+    --border-strong: rgba(0,0,0,0.15);
+    --text-primary: #1a1a18;
+    --text-secondary: #52514e;
+    --text-muted: #8a8880;
+    --blue-bg: #e6f1fb; --blue-text: #0c447c; --blue-accent: #2a78d6;
+    --green-bg: #eaf3de; --green-text: #27500a; --green-accent: #1baf7a;
+    --amber-bg: #faeeda; --amber-text: #633806; --amber-accent: #eda100;
+    --purple-bg: #eeedfe; --purple-text: #3c3489;
+    --gray-bg: #f1f0ec; --gray-text: #52514e;
+    --radius: 8px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); font-family: -apple-system, 'Helvetica Neue', Arial, sans-serif; color: var(--text-primary); font-size: 14px; line-height: 1.6; }
+
+  .page { max-width: 800px; margin: 0 auto; padding: 24px 16px 60px; }
+
+  /* Header */
+  .header { text-align: center; margin-bottom: 28px; }
+  .header-emoji { font-size: 40px; margin-bottom: 8px; }
+  .header h1 { font-size: 22px; font-weight: 600; color: var(--text-primary); }
+  .header-sub { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+
+  /* Summary cards */
+  .summary-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 24px; }
+  @media (min-width: 500px) { .summary-grid { grid-template-columns: repeat(4, 1fr); } }
+  .metric { background: var(--surface); border-radius: var(--radius); padding: 14px; border: 0.5px solid var(--border); }
+  .metric-label { font-size: 11px; color: var(--text-muted); margin-bottom: 5px; }
+  .metric-value { font-size: 18px; font-weight: 600; color: var(--text-primary); }
+  .metric-sub { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
+  .metric.highlight { background: var(--blue-bg); border-color: rgba(42,120,214,0.2); }
+  .metric.highlight .metric-value { color: var(--blue-text); }
+
+  /* Tabs */
+  .tabs { display: flex; gap: 6px; margin-bottom: 16px; border-bottom: 0.5px solid var(--border); padding-bottom: 10px; overflow-x: auto; }
+  .tab { padding: 6px 16px; border-radius: var(--radius); font-size: 13px; cursor: pointer; border: 0.5px solid transparent; color: var(--text-secondary); background: transparent; white-space: nowrap; font-family: inherit; }
+  .tab.active { background: var(--blue-bg); color: var(--blue-text); border-color: rgba(42,120,214,0.3); font-weight: 500; }
+  .tab:hover:not(.active) { background: var(--surface); }
+
+  .section { display: none; }
+  .section.visible { display: block; }
+
+  /* Day block */
+  .day-block { margin-bottom: 20px; border-radius: 12px; overflow: hidden; border: 0.5px solid var(--border); }
+  .day-header { display: flex; align-items: center; justify-content: space-between; padding: 11px 14px; background: var(--surface); border-left: 3px solid #2a78d6; flex-wrap: wrap; gap: 6px; }
+  .day-title { font-weight: 600; font-size: 14px; color: var(--text-primary); }
+  .day-badges { display: flex; gap: 6px; flex-wrap: wrap; }
+
+  /* Badge */
+  .badge { font-size: 11px; padding: 3px 9px; border-radius: 99px; font-weight: 500; white-space: nowrap; }
+  .badge-jpy { background: var(--blue-bg); color: var(--blue-text); }
+  .badge-krw { background: var(--green-bg); color: var(--green-text); }
+
+  /* Table */
+  .tx-table { width: 100%; border-collapse: collapse; background: var(--surface2); }
+  .tx-table th { font-size: 11px; color: var(--text-muted); font-weight: 500; text-align: left; padding: 7px 12px; border-bottom: 0.5px solid var(--border); background: var(--surface); }
+  .tx-table td { padding: 9px 12px; border-bottom: 0.5px solid var(--border); vertical-align: top; }
+  .tx-table tr:last-child td { border-bottom: none; }
+  .tx-table tbody tr:hover td { background: #f0efeb; }
+  .row-excluded td { opacity: 0.5; }
+  .merchant-name { font-weight: 500; font-size: 13px; color: var(--text-primary); }
+  .merchant-desc { font-size: 11px; color: var(--text-muted); margin-top: 2px; line-height: 1.4; }
+  .type-pill { font-size: 10px; padding: 2px 7px; border-radius: 99px; white-space: nowrap; display: inline-block; }
+  .type-payment { background: var(--blue-bg); color: var(--blue-text); }
+  .type-atm { background: var(--amber-bg); color: var(--amber-text); }
+  .type-krw { background: var(--green-bg); color: var(--green-text); }
+  .type-online { background: var(--purple-bg); color: var(--purple-text); }
+  .type-excluded { background: var(--gray-bg); color: var(--gray-text); border: 0.5px solid var(--border); }
+  .amt-main { font-weight: 600; text-align: right; white-space: nowrap; font-size: 13px; }
+  .amt-sub { color: var(--text-muted); text-align: right; font-size: 11px; }
+  .time-cell { color: var(--text-muted); font-size: 11px; white-space: nowrap; padding-top: 10px !important; }
+  .type-cell { padding-top: 10px !important; }
+  .subtotal-row td { font-weight: 600; background: var(--surface); border-top: 0.5px solid var(--border-strong) !important; font-size: 13px; }
+
+  /* Chart bars */
+  .chart-card { background: var(--surface); border-radius: 12px; border: 0.5px solid var(--border); padding: 18px; margin-bottom: 16px; }
+  .chart-title { font-size: 13px; color: var(--text-secondary); font-weight: 500; margin-bottom: 14px; }
+  .bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .bar-label { font-size: 12px; color: var(--text-secondary); width: 48px; text-align: right; flex-shrink: 0; }
+  .bar-track { flex: 1; height: 22px; background: var(--bg); border-radius: 4px; overflow: hidden; }
+  .bar-fill-wrap { display: flex; height: 100%; border-radius: 4px; overflow: hidden; }
+  .bar-val { font-size: 12px; color: var(--text-secondary); min-width: 85px; text-align: right; flex-shrink: 0; }
+  .legend-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 10px; }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--text-secondary); }
+  .legend-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+
+  /* Category grid */
+  .cat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  @media (min-width: 500px) { .cat-grid { grid-template-columns: repeat(4, 1fr); } }
+  .cat-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: 12px; padding: 14px; }
+  .cat-name { font-size: 11px; color: var(--text-muted); margin-bottom: 4px; }
+  .cat-val { font-size: 16px; font-weight: 600; color: var(--text-primary); }
+  .cat-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+  .cat-excluded { opacity: 0.55; }
+  .cat-excluded .cat-val { text-decoration: line-through; color: var(--text-muted); }
+
+  /* Note */
+  .note { font-size: 12px; color: var(--amber-text); background: var(--amber-bg); border-left: 3px solid var(--amber-accent); border-radius: var(--radius); padding: 9px 12px; margin-bottom: 14px; line-height: 1.5; }
+
+  /* Footer */
+  .footer { text-align: center; font-size: 11px; color: var(--text-muted); margin-top: 40px; padding-top: 16px; border-top: 0.5px solid var(--border); }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="header">
+    <div class="header-emoji">🇯🇵</div>
+    <h1>홋카이도 여행 지출 내역</h1>
+    <div class="header-sub">2026년 6월 18일 – 22일 · 삿포로 / 노보리베츠</div>
+  </div>
+
+  <div class="summary-grid">
+    <div class="metric highlight">
+      <div class="metric-label">총 지출 합계</div>
+      <div class="metric-value" id="total-krw">—</div>
+      <div class="metric-sub">개인 사용 제외</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">JPY 지출 (원화 환산)</div>
+      <div class="metric-value" id="jpy-krw">—</div>
+      <div class="metric-sub" id="jpy-jpy">—</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">원화 직접 지출</div>
+      <div class="metric-value" id="krw-direct">—</div>
+      <div class="metric-sub">JR패스 + 공항</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">개인 사용 (제외)</div>
+      <div class="metric-value" id="excluded-total">—</div>
+      <div class="metric-sub">합계 미포함</div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('daily',event)">날짜별</button>
+    <button class="tab" onclick="showTab('all',event)">전체 내역</button>
+    <button class="tab" onclick="showTab('chart',event)">분석</button>
+  </div>
+
+  <div id="tab-daily" class="section visible"><div id="daily-blocks"></div></div>
+
+  <div id="tab-all" class="section">
+    <div class="note">⚠ 06/20 HOKKAIDOBALLPARK FVILLAGE 18:14 결제(¥800) 두 건은 별도 승인번호로 모두 유효 처리됨.</div>
+    <div style="border-radius:12px;overflow:hidden;border:0.5px solid var(--border);">
+      <table class="tx-table">
+        <thead><tr>
+          <th>날짜</th><th>시간</th><th>종류</th><th>가맹점 / 내용</th>
+          <th style="text-align:right">금액</th><th style="text-align:right">KRW</th>
+        </tr></thead>
+        <tbody id="all-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div id="tab-chart" class="section">
+    <div class="chart-card">
+      <div class="chart-title">날짜별 지출 (KRW 기준, 개인 사용 제외)</div>
+      <div id="bar-chart"></div>
+      <div class="legend-row">
+        <div class="legend-item"><div class="legend-dot" style="background:#2a78d6"></div>카드 결제 (JPY)</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#eda100"></div>ATM 출금 (JPY)</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#1baf7a"></div>원화 지출</div>
+      </div>
+    </div>
+    <div class="cat-grid" id="cat-grid"></div>
+  </div>
+
+  <div class="footer">유정이 · 2026년 홋카이도 여행 정산</div>
+</div>
+
+<script>
+const allTx = [
+  { date:'06/18', time:'—',     type:'online',  merchant:'JR패스 (와그 구매)',              desc:'홋카이도 전 노선 탑승 가능한 JR 홋카이도 레일패스. 온라인 사전 구매.',                                       jpy:0,     krw:185248, excluded:false },
+  { date:'06/19', time:'—',     type:'krw',     merchant:'인천공항 점심',                   desc:'출국 전 인천공항 식사.',                                                                                        jpy:0,     krw:23000,  excluded:false },
+  { date:'06/19', time:'—',     type:'krw',     merchant:'인천공항 간식',                   desc:'출국 전 인천공항 간식 구매.',                                                                                   jpy:0,     krw:2800,   excluded:false },
+  { date:'06/19', time:'14:14', type:'payment', merchant:'HOTEL EMION SAPPORO',             desc:'삿포로 시내 호텔. 체크인 시 결제.',                                                                             jpy:1200,  krw:11440,  excluded:false },
+  { date:'06/19', time:'14:24', type:'atm',     merchant:'KITA-KU SAPPORO-SHI (ATM 출금)', desc:'삿포로 키타구 ATM에서 현금 출금. 이후 현금 소비에 사용.',                                                      jpy:20220, krw:192700, excluded:false },
+  { date:'06/19', time:'16:30', type:'payment', merchant:'KAITENZUSHI TORITON KITAH',       desc:'삿포로 키타구 회전초밥 체인 "とりとん". 홋카이도 신선 해산물 초밥.',                                          jpy:8338,  krw:78907,  excluded:false },
+  { date:'06/19', time:'22:49', type:'payment', merchant:'SEVEN-ELEVEN',                    desc:'편의점. 야식 또는 음료.',                                                                                       jpy:141,   krw:1337,   excluded:false },
+  { date:'06/20', time:'10:29', type:'payment', merchant:'DAIICHI KAISENMARU',              desc:'다이이치 카이센마루(第一海鮮丸). 삿포로 해산물 덮밥·회 전문점.',                                             jpy:9000,  krw:85520,  excluded:false },
+  { date:'06/20', time:'12:13', type:'payment', merchant:'CARD PAYMENT',                    desc:'카드 단말기 결제 (가맹점명 미표시). 식음료 또는 입장료 추정.',                                                 jpy:1300,  krw:12352,  excluded:false },
+  { date:'06/20', time:'14:01', type:'payment', merchant:'HOKKAIDOBALLPARK FVILLAGE',       desc:'홋카이도 볼파크 F빌리지 — 에스콘 필드 홋카이도 복합 엔터테인먼트 시설. 식음료·굿즈 등.',                    jpy:380,   krw:3610,   excluded:false },
+  { date:'06/20', time:'14:35', type:'payment', merchant:'HOKKAIDOBALLPARK FVILLAGE',       desc:'홋카이도 볼파크 F빌리지 — 식음료·굿즈 등.',                                                                    jpy:1000,  krw:9502,   excluded:false },
+  { date:'06/20', time:'14:51', type:'payment', merchant:'HOKKAIDOBALLPARK FVILLAGE',       desc:'홋카이도 볼파크 F빌리지 — 식음료·굿즈 등.',                                                                    jpy:990,   krw:9407,   excluded:false },
+  { date:'06/20', time:'14:56', type:'payment', merchant:'HOKKAIDOBALLPARK FVILLAGE',       desc:'홋카이도 볼파크 F빌리지 — 식음료·굿즈 등.',                                                                    jpy:720,   krw:6841,   excluded:false },
+  { date:'06/20', time:'14:59', type:'payment', merchant:'HOKKAIDOBALLPARK FVILLAGE',       desc:'홋카이도 볼파크 F빌리지 — 식음료·굿즈 등.',                                                                    jpy:1600,  krw:15203,  excluded:false },
+  { date:'06/20', time:'16:22', type:'payment', merchant:'HOKKAIDOBALLPARK FVILLAGE',       desc:'홋카이도 볼파크 F빌리지 — 식음료·굿즈 등.',                                                                    jpy:380,   krw:3610,   excluded:false },
+  { date:'06/20', time:'18:14', type:'payment', merchant:'HOKKAIDOBALLPARK FVILLAGE',       desc:'홋카이도 볼파크 F빌리지 — 식음료·굿즈 등.',                                                                    jpy:800,   krw:7601,   excluded:false },
+  { date:'06/20', time:'18:14', type:'payment', merchant:'HOKKAIDOBALLPARK FVILLAGE',       desc:'홋카이도 볼파크 F빌리지 — 식음료·굿즈 등. (별도 승인번호)',                                                   jpy:800,   krw:7601,   excluded:false },
+  { date:'06/20', time:'20:11', type:'payment', merchant:'DAISO',                           desc:'정이 개인 사용 — 개별 지불.',                                                                                   jpy:220,   krw:2090,   excluded:true  },
+  { date:'06/20', time:'21:27', type:'payment', merchant:'NAMARAMUJINNGISUKAN ARATA',       desc:'나마라 무인 징기스칸 아라타. 삿포로 스스키노 셀프 양고기 구이 전문점. "나마라"는 홋카이도 사투리로 \'매우\'.',jpy:10454, krw:99337,  excluded:false },
+  { date:'06/21', time:'14:50', type:'payment', merchant:'VENDING MACHINE',                 desc:'자판기. 음료.',                                                                                                 jpy:450,   krw:4276,   excluded:false },
+  { date:'06/21', time:'15:56', type:'payment', merchant:'NOBORIBETSU BEAR PAR',            desc:'노보리베츠 베어 파크(登別クマ牧場). 노보리베츠 산 정상 곰 목장 관광지. 입장료.',                            jpy:6000,  krw:57013,  excluded:false },
+  { date:'06/21', time:'20:16', type:'payment', merchant:'SEICOMART',                       desc:'세이코마트. 홋카이도 토착 편의점 체인. 음식·음료.',                                                            jpy:751,   krw:7136,   excluded:false },
+  { date:'06/21', time:'20:22', type:'payment', merchant:'SEVEN-ELEVEN',                    desc:'편의점. 음식·음료.',                                                                                            jpy:331,   krw:3145,   excluded:false },
+  { date:'06/21', time:'20:25', type:'payment', merchant:'SEICOMART',                       desc:'세이코마트. 홋카이도 토착 편의점 체인. 음식·음료.',                                                            jpy:1608,  krw:15279,  excluded:false },
+  { date:'06/22', time:'10:21', type:'payment', merchant:'OYADOKIYOMIZUYA',                 desc:'오야도 기요미즈야. 신치토세공항 내 식당·기념품점 추정.',                                                       jpy:3150,  krw:29921,  excluded:false },
+  { date:'06/22', time:'11:21', type:'payment', merchant:'COCA-COLA VENDING',               desc:'코카콜라 자판기. 음료.',                                                                                        jpy:110,   krw:1046,   excluded:false },
+  { date:'06/22', time:'13:06', type:'payment', merchant:'SHINCHITOSEKUUKOUTA-MINAR',       desc:'오빠 개인 사용 — 개별 지불. (신치토세공항 터미널 내 매장)',                                                    jpy:3940,  krw:37522,  excluded:true  },
+  { date:'06/22', time:'13:46', type:'payment', merchant:'AINZ&TULPE',                      desc:'정이 개인 사용 — 개별 지불. (드럭스토어 화장품·잡화)',                                                        jpy:1170,  krw:11133,  excluded:true  },
+  { date:'06/22', time:'14:17', type:'payment', merchant:'SHINCHITOSEKUUKOUTA-MINAR',       desc:'신치토세공항 터미널 내 매장. 귀국 전 추가 구매.',                                                             jpy:1250,  krw:11884,  excluded:false },
+];
+
+function fmt(n){ return Number(n).toLocaleString('ko-KR'); }
+
+const typeMap = {
+  payment:{ label:'카드 결제', cls:'type-payment' },
+  atm:    { label:'ATM 출금',  cls:'type-atm'     },
+  krw:    { label:'원화 결제', cls:'type-krw'     },
+  online: { label:'온라인',    cls:'type-online'  },
+};
+
+// 합계 계산
+const grandTotal    = allTx.reduce((a,r)=>a+(r.excluded?0:r.krw),0);
+const jpyKrw        = allTx.filter(r=>!r.excluded&&r.jpy>0).reduce((a,r)=>a+r.krw,0);
+const jpyJpy        = allTx.filter(r=>!r.excluded&&r.jpy>0).reduce((a,r)=>a+r.jpy,0);
+const krwDirect     = allTx.filter(r=>!r.excluded&&(r.type==='krw'||r.type==='online')).reduce((a,r)=>a+r.krw,0);
+const excludedTotal = allTx.filter(r=>r.excluded).reduce((a,r)=>a+r.krw,0);
+
+document.getElementById('total-krw').textContent    = '₩'+fmt(grandTotal);
+document.getElementById('jpy-krw').textContent      = '₩'+fmt(jpyKrw);
+document.getElementById('jpy-jpy').textContent      = '¥'+fmt(jpyJpy);
+document.getElementById('krw-direct').textContent   = '₩'+fmt(krwDirect);
+document.getElementById('excluded-total').textContent= '₩'+fmt(excludedTotal);
+
+const dates = ['06/18','06/19','06/20','06/21','06/22'];
+const dateNames = {
+  '06/18':'6월 18일 (목) — 출발 전',
+  '06/19':'6월 19일 (금) — 인천 → 삿포로',
+  '06/20':'6월 20일 (토) — F빌리지 · 삿포로',
+  '06/21':'6월 21일 (일) — 노보리베츠',
+  '06/22':'6월 22일 (월) — 귀국',
+};
+const dayColors = {'06/18':'#4a3aa7','06/19':'#2a78d6','06/20':'#1baf7a','06/21':'#eda100','06/22':'#d85a30'};
+
+// 날짜별 탭
+const dailyBlocks = document.getElementById('daily-blocks');
+dates.forEach(d=>{
+  const rows = allTx.filter(r=>r.date===d);
+  if (!rows.length) return;
+  const dKrw = rows.reduce((a,r)=>a+(r.excluded?0:r.krw),0);
+  const dJpy = rows.reduce((a,r)=>a+(r.excluded?0:r.jpy),0);
+  const badges = [];
+  if (dJpy>0) badges.push(`<span class="badge badge-jpy">¥${fmt(dJpy)}</span>`);
+  badges.push(`<span class="badge badge-krw">₩${fmt(dKrw)}</span>`);
+
+  const rowsHtml = rows.map(r=>{
+    const tm = typeMap[r.type];
+    const typeLabel = r.excluded ? '개인 사용' : tm.label;
+    const typeCls   = r.excluded ? 'type-excluded' : tm.cls;
+    const rawAmt    = r.jpy>0 ? `¥${fmt(r.jpy)}` : `₩${fmt(r.krw)}`;
+    const amtHtml   = r.excluded
+      ? `<span style="text-decoration:line-through;color:#aaa;font-size:11px">${rawAmt}</span><br><span style="font-weight:600">₩0</span>`
+      : `<span style="font-weight:600">${rawAmt}</span>`;
+    const amtSub    = (!r.excluded && r.jpy>0) ? `<div style="font-size:11px;color:#8a8880;text-align:right">₩${fmt(r.krw)}</div>` : '';
+    const rowCls    = r.excluded ? ' class="row-excluded"' : '';
+    return `<tr${rowCls}>
+      <td class="time-cell">${r.time}</td>
+      <td class="type-cell"><span class="type-pill ${typeCls}">${typeLabel}</span></td>
+      <td>
+        <div class="merchant-name">${r.merchant}</div>
+        <div class="merchant-desc">${r.desc}</div>
+      </td>
+      <td class="amt-main">${amtHtml}${amtSub}</td>
+    </tr>`;
+  }).join('');
+
+  dailyBlocks.innerHTML += `
+    <div class="day-block">
+      <div class="day-header" style="border-left-color:${dayColors[d]}">
+        <div class="day-title">${dateNames[d]}</div>
+        <div class="day-badges">${badges.join('')}</div>
+      </div>
+      <table class="tx-table">
+        <thead><tr>
+          <th style="width:50px">시간</th>
+          <th style="width:72px">종류</th>
+          <th>가맹점 / 상세</th>
+          <th style="text-align:right;width:110px">금액</th>
+        </tr></thead>
+        <tbody>${rowsHtml}</tbody>
+        <tr class="subtotal-row">
+          <td colspan="3" style="color:var(--text-secondary)">소계 (개인 사용 제외)</td>
+          <td style="text-align:right">${dJpy>0?'<span style="color:#8a8880;font-size:12px;margin-right:4px">¥'+fmt(dJpy)+'</span>':''}<span>₩${fmt(dKrw)}</span></td>
+        </tr>
+      </table>
+    </div>`;
+});
+
+// 전체 탭
+const allBody = document.getElementById('all-body');
+let totJpy=0, totKrw=0;
+allTx.forEach(r=>{
+  if(!r.excluded){totJpy+=r.jpy; totKrw+=r.krw;}
+  const tm = typeMap[r.type];
+  const typeLabel = r.excluded ? '개인 사용' : tm.label;
+  const typeCls   = r.excluded ? 'type-excluded' : tm.cls;
+  const rawAmt    = r.jpy>0 ? `¥${fmt(r.jpy)}` : `₩${fmt(r.krw)}`;
+  const amtHtml   = r.excluded
+    ? `<span style="text-decoration:line-through;color:#aaa;font-size:11px">${rawAmt}</span><br><b>₩0</b>`
+    : `<b>${rawAmt}</b>`;
+  const amtKrw    = (!r.excluded && r.jpy>0) ? `₩${fmt(r.krw)}` : '—';
+  const rowCls    = r.excluded ? ' class="row-excluded"' : '';
+  allBody.innerHTML += `<tr${rowCls}>
+    <td style="color:var(--text-muted);font-size:11px;white-space:nowrap">2026.${r.date}</td>
+    <td class="time-cell">${r.time}</td>
+    <td><span class="type-pill ${typeCls}">${typeLabel}</span></td>
+    <td><div class="merchant-name">${r.merchant}</div><div class="merchant-desc">${r.desc}</div></td>
+    <td class="amt-main">${amtHtml}</td>
+    <td class="amt-sub">${amtKrw}</td>
+  </tr>`;
+});
+allBody.innerHTML += `<tr class="subtotal-row">
+  <td colspan="4" style="color:var(--text-secondary)">합계 (개인 사용 제외)</td>
+  <td style="text-align:right;color:var(--text-secondary)">¥${fmt(totJpy)}</td>
+  <td style="text-align:right">₩${fmt(totKrw)}</td>
+</tr>`;
+
+// 분석 탭
+const maxKrw = Math.max(...dates.map(d=>allTx.filter(r=>r.date===d&&!r.excluded).reduce((a,r)=>a+r.krw,0)));
+const barChart = document.getElementById('bar-chart');
+dates.forEach(d=>{
+  const rows = allTx.filter(r=>r.date===d&&!r.excluded);
+  const card = rows.filter(r=>r.type==='payment').reduce((a,r)=>a+r.krw,0);
+  const atm  = rows.filter(r=>r.type==='atm').reduce((a,r)=>a+r.krw,0);
+  const krw  = rows.filter(r=>r.type==='krw'||r.type==='online').reduce((a,r)=>a+r.krw,0);
+  const total= card+atm+krw;
+  if (!total) return;
+  const cP=(card/maxKrw*100).toFixed(1), aP=(atm/maxKrw*100).toFixed(1), kP=(krw/maxKrw*100).toFixed(1);
+  barChart.innerHTML += `<div class="bar-row">
+    <div class="bar-label">${d}</div>
+    <div class="bar-track"><div class="bar-fill-wrap">
+      <div style="width:${cP}%;background:#2a78d6;height:100%;"></div>
+      <div style="width:${aP}%;background:#eda100;height:100%;"></div>
+      <div style="width:${kP}%;background:#1baf7a;height:100%;"></div>
+    </div></div>
+    <div class="bar-val">₩${fmt(total)}</div>
+  </div>`;
+});
+
+const cats=[
+  {name:'🍜 식비·음료',     keys:['KAITENZUSHI TORITON KITAH','DAIICHI KAISENMARU','OYADOKIYOMIZUYA','NAMARAMUJINNGISUKAN ARATA','SEVEN-ELEVEN','SEICOMART','COCA-COLA VENDING','VENDING MACHINE','인천공항 점심','인천공항 간식','CARD PAYMENT'], excl:false},
+  {name:'🎡 관광·체험',     keys:['NOBORIBETSU BEAR PAR','HOKKAIDOBALLPARK FVILLAGE'], excl:false},
+  {name:'🚄 교통·숙박·패스', keys:['JR패스 (와그 구매)','SHINCHITOSEKUUKOUTA-MINAR','HOTEL EMION SAPPORO','KITA-KU SAPPORO-SHI (ATM 출금)'], excl:false},
+  {name:'👤 개인 사용 (제외)',keys:['DAISO','AINZ&TULPE','SHINCHITOSEKUUKOUTA-MINAR'], excl:true},
+];
+const catGrid = document.getElementById('cat-grid');
+cats.forEach(cat=>{
+  const rows = allTx.filter(r=>cat.keys.includes(r.merchant));
+  const krw  = cat.excl
+    ? rows.filter(r=>r.excluded).reduce((a,r)=>a+r.krw,0)
+    : rows.filter(r=>!r.excluded).reduce((a,r)=>a+r.krw,0);
+  const jpy  = rows.filter(r=>!r.excluded).reduce((a,r)=>a+r.jpy,0);
+  catGrid.innerHTML += `<div class="cat-card${cat.excl?' cat-excluded':''}">
+    <div class="cat-name">${cat.name}</div>
+    <div class="cat-val">₩${fmt(krw)}</div>
+    <div class="cat-sub">${cat.excl?'합계 미포함':(jpy>0?'¥'+fmt(jpy)+' 포함':'')}</div>
+  </div>`;
+});
+
+function showTab(name, e){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('visible'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('visible');
+  e.target.classList.add('active');
+}
+</script>
+</body>
+</html>
